@@ -1400,7 +1400,7 @@ a.player-title-row:hover { background: var(--panel-2); }
 
   <div class="page-head">
     <div>
-      <h1>VALORANT Esports Overview</h1>
+      <h1>Arsip Data</h1>
       <p class="page-sub" id="pageSub">27.442 map dimainkan · 12.669 pertandingan · 235 turnamen · 4.025 tim</p>
     </div>
     <div class="filter-field filter-years">
@@ -1650,35 +1650,30 @@ a.player-title-row:hover { background: var(--panel-2); }
     <div class="footer-grid">
       <div>
         <h2 class="footer-title">Sumber data</h2>
-        <p>VLR.gg — dataset <a href="https://www.kaggle.com/datasets/ryanluong1/valorant-champion-tour-2021-2023-data" target="_blank" rel="noopener">“Valorant Champion Tour 2021–2026 Data”</a> oleh Ryan Luong (Kaggle, MIT), di-scrape dari vlr.gg.</p>
-        <p>Tabel: <code>all_ids</code>, <code>matches/scores.csv</code> (pemenang), <code>matches/overview.csv</code> (lineup &amp; performa).</p>
-        <p>Logo event/tim dan foto pemain: VLR.gg (og:image), diperkecil dan disematkan.</p>
+        <p>Semua angka di halaman ini diolah dari arsip pertandingan VLR.gg. Dataset-nya dirilis Ryan Luong di <a href="https://www.kaggle.com/datasets/ryanluong1/valorant-champion-tour-2021-2023-data" target="_blank" rel="noopener">Kaggle</a> dengan lisensi MIT.</p>
+        <p>Tabel yang dipakai: <code>all_ids</code>, <code>matches/scores.csv</code>, dan <code>matches/overview.csv</code>.</p>
+        <p>Logo tim, logo event, dan foto pemain juga diambil dari VLR.gg. Ukurannya diperkecil supaya file tetap ringan.</p>
       </div>
       <div>
-        <h2 class="footer-title">Metode</h2>
-        <ul>
-          <li>27.450 baris dibaca · 8 dikeluarkan (peta kosong/<code>TBD</code>).</li>
-          <li>Turnamen = nama unik: 235 nama, 250 ID (15 nama punya dua ID).</li>
-          <li>Pemenang = skor final dari <code>scores.csv</code>; final dideteksi dari match type (Grand Final/Final).</li>
-          <li>Performa pemain = agregat <code>overview.csv</code> per turnamen (rating, ACS, K/D, W–L).</li>
-          <li>Wilayah = kata kunci nama turnamen.</li>
-          <li>Varian <em>Open Qualifier #1/#2</em> digabung.</li>
-        </ul>
+        <h2 class="footer-title">Cara mengolah</h2>
+        <p>Dari 27.450 baris, 8 dibuang karena nama petanya kosong atau masih <code>TBD</code>.</p>
+        <p>Turnamen dihitung dari nama unik: 235 nama. Jumlah ID-nya 250 karena 15 nama tercatat dua kali.</p>
+        <p>Juara ditentukan dari skor final, dan finalnya dicari lewat jenis laga (Grand Final atau Final).</p>
+        <p>Performa pemain dirangkum per turnamen dari <code>overview.csv</code>: rating, ACS, K/D, dan rekor menang-kalah.</p>
+        <p>Wilayah ditebak dari kata kunci nama turnamen. Varian Open Qualifier #1 dan #2 digabung.</p>
       </div>
       <div>
-        <h2 class="footer-title">Keterbatasan</h2>
-        <ul>
-          <li>Juara hanya diisi bila final &amp; skornya terdeteksi; beberapa turnamen liga tanpa final.</li>
-          <li>Partisipasi pemain per pertandingan, bukan per peta; beberapa laga tanpa data lineup.</li>
-          <li>Cakupan tidak merata (85,1% di 2021–2022).</li>
-          <li>Data 2026 kemungkinan belum lengkap.</li>
-          <li>Wilayah heuristik; tier turnamen dikurasi manual untuk major.</li>
-        </ul>
+        <h2 class="footer-title">Yang perlu diketahui</h2>
+        <p>Tidak semua turnamen punya final yang jelas, jadi sebagian tidak punya juara.</p>
+        <p>Partisipasi pemain dicatat per pertandingan, bukan per peta. Sebagian laga juga tidak punya data lineup.</p>
+        <p>Arsip belum merata: 85,1% data berasal dari 2021–2022, dan data 2026 kemungkinan belum lengkap.</p>
+        <p>Wilayah masih perkiraan. Tier major ditentukan manual, bukan dari dataset.</p>
+        <p>Penghargaan di halaman tim dan pemain hanya berarti gelar turnamen. Dataset ini tidak punya data MVP atau penghargaan individu.</p>
       </div>
     </div>
     <div class="colophon">
       <span>Infografis Interaktif · Seni Presentasi Berbasis Data · 2026</span>
-      <span>HTML, CSS, SVG — tanpa pustaka eksternal</span>
+      <span>Dibuat dengan HTML, CSS, dan SVG, tanpa pustaka eksternal.</span>
     </div>
   </div>
 </footer>
@@ -3185,7 +3180,8 @@ const Charts = (() => {
         f(pct(VIEW.insights.coverage2021_2022), 'Data 2021–2022', 'cakupan arsip tidak merata'),
         f(pct(VIEW.insights.openQualifierShare), 'Open Qualifier', 'stage dengan map terbanyak'),
         f(pct(singleShare), '1 peta per laga', 'kemungkinan arsip tidak lengkap'),
-      ].join('') + '<p class="findings-note">Tanpa skor/pemenang — tidak ada analisis hasil.</p>';
+      ].join('') +
+      '<p class="findings-note">Dashboard ini menjelaskan struktur arsip. Hasil pertandingan dan juaranya ada di halaman Juara.</p>';
   }
 
   /* ------------------------------ header & status ------------------------------ */
@@ -4074,7 +4070,7 @@ const Charts = (() => {
       <div class="win-hero-head">
         <div>
           <h2 class="panel-title">Statistik kemenangan tim</h2>
-          <p class="panel-note">16 major VCT · menang–kalah laga</p>
+          <p class="panel-note">Dihitung dari 16 major VCT</p>
         </div>
         <div class="win-controls">
           <label class="filter-field"><span class="filter-label">Tahun</span>
@@ -4141,11 +4137,11 @@ const Charts = (() => {
       </div>
       <p class="chart-note">${
         leader
-          ? `${winMetric === 'losses' ? 'Terbanyak kalah' : 'Terbanyak menang'}: ${esc(
-              F.teams[leader.id]
-            )} — ${leader.w} menang, ${leader.l} kalah`
+          ? `${
+              winMetric === 'losses' ? 'Paling banyak kalah' : 'Paling banyak menang'
+            }: ${esc(F.teams[leader.id])} (${leader.w} menang, ${leader.l} kalah). Angka ini hanya dari 16 major VCT.`
           : ''
-      } · statistik dari 16 major VCT.</p>
+      }</p>
     `;
   }
 
@@ -4196,7 +4192,13 @@ const Charts = (() => {
         <span class="podium-year">${p.year}</span>
         <span class="podium-event with-logo">${eventBadge(w)}<span>${esc(w.name)}</span></span>
       </div>
-      ${!p.isChampions ? '<p class="podium-note">Champions tahun ini belum ada; memakai Masters terakhir.</p>' : ''}
+      ${
+        !p.isChampions
+          ? `<p class="podium-note">Belum ada Champions tahun ini, jadi podium memakai ${esc(
+              w.name
+            )}.</p>`
+          : ''
+      }
       <div class="podium-row p1">
         <span class="podium-rank">1</span>${teamLink(w.winner, 'podium-team')}
         <span class="podium-score">${scoreText(w)}</span>
@@ -4225,7 +4227,8 @@ const Charts = (() => {
 
       <h2 class="dash-title">Podium per tahun</h2>
       <div class="podium-grid">${PODIUMS.map(podiumCard).join('')}</div>
-      <p class="chart-note">Podium event utama tiap tahun: Champions 2021–2025; 2026 memakai Masters terakhir.</p>
+      <p class="chart-note">Podium diambil dari Champions tiap tahun. Khusus 2026, Champions belum
+        digelar, jadi dipakai Masters terakhir.</p>
 
       <h2 class="dash-title">Champions</h2>
       <div class="champ-grid">${CHAMPIONS.map(champCard).join('')}</div>
@@ -4241,8 +4244,8 @@ const Charts = (() => {
         .slice(0, 8)
         .map(titleRow)
         .join('')}</div>
-      <p class="chart-note">Fokus 16 major VCT. Arsip lengkap 235 turnamen tetap tersedia di
-        <a href="#/data">Jelajah Data</a>.</p>
+      <p class="chart-note">Halaman ini fokus ke 16 major VCT. Data 235 turnamen tetap bisa dibuka di
+        <a href="#/data">Arsip Data</a>.</p>
     `;
 
     initWinHero();
@@ -4398,8 +4401,8 @@ const Charts = (() => {
         `${rows.length} tim pernah menjuarai VCT major · ${MAJORS.length} gelar`
       )}
       <div class="winner-table">${titleHead}${rows.map(titleRow).join('')}</div>
-      <p class="chart-note">Gelar major = VCT Champions atau Masters. Gelar regional/Challengers
-        tetap tercatat di halaman masing-masing tim.</p>
+      <p class="chart-note">Di sini hanya dihitung gelar major, yaitu Champions dan Masters.
+        Gelar regional tetap ada di halaman tiap tim.</p>
     `;
   }
 
@@ -4436,7 +4439,7 @@ const Charts = (() => {
           )
           .join('')}
       </div>
-      <p class="chart-note">Termasuk pemain pengganti yang tampil untuk tim juara di turnamen tersebut.</p>
+      <p class="chart-note">Termasuk pemain pengganti yang sempat tampil untuk tim juara.</p>
     `;
   }
 
@@ -4497,7 +4500,7 @@ const Charts = (() => {
                 )
                 .join('') || '<p class="chart-note">Belum ada trofi pada arsip ini.</p>'
             }</div>
-            <p class="rd-method">Penghargaan = gelar turnamen. Dataset tidak memuat MVP atau penghargaan individu.</p>
+            <p class="rd-method">Yang dihitung sebagai penghargaan hanya gelar turnamen. Dataset ini tidak punya data MVP atau penghargaan individu.</p>
 
             <div class="panel-head" style="margin-top:18px"><h2 class="panel-title">Performa</h2><span class="panel-note">seluruh turnamen</span></div>
             <div class="rd-stats">
@@ -4625,7 +4628,7 @@ const Charts = (() => {
                 )
                 .join('') || '<p class="chart-note">Belum ada trofi.</p>'
             }</div>
-            <p class="rd-method">Gelar major dihitung dari roster tim juara. Dataset tidak memuat MVP atau penghargaan individu.</p>
+            <p class="rd-method">Gelar major dihitung dari roster tim yang menang. Dataset ini tidak punya data MVP atau penghargaan individu.</p>
 
             <div class="panel-head" style="margin-top:18px"><h2 class="panel-title">Laga terakhir</h2></div>
             <div class="match-list">${

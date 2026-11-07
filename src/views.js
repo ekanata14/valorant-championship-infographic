@@ -466,7 +466,7 @@
       <div class="win-hero-head">
         <div>
           <h2 class="panel-title">Statistik kemenangan tim</h2>
-          <p class="panel-note">16 major VCT · menang–kalah laga</p>
+          <p class="panel-note">Dihitung dari 16 major VCT</p>
         </div>
         <div class="win-controls">
           <label class="filter-field"><span class="filter-label">Tahun</span>
@@ -533,11 +533,11 @@
       </div>
       <p class="chart-note">${
         leader
-          ? `${winMetric === 'losses' ? 'Terbanyak kalah' : 'Terbanyak menang'}: ${esc(
-              F.teams[leader.id]
-            )} — ${leader.w} menang, ${leader.l} kalah`
+          ? `${
+              winMetric === 'losses' ? 'Paling banyak kalah' : 'Paling banyak menang'
+            }: ${esc(F.teams[leader.id])} (${leader.w} menang, ${leader.l} kalah). Angka ini hanya dari 16 major VCT.`
           : ''
-      } · statistik dari 16 major VCT.</p>
+      }</p>
     `;
   }
 
@@ -588,7 +588,13 @@
         <span class="podium-year">${p.year}</span>
         <span class="podium-event with-logo">${eventBadge(w)}<span>${esc(w.name)}</span></span>
       </div>
-      ${!p.isChampions ? '<p class="podium-note">Champions tahun ini belum ada; memakai Masters terakhir.</p>' : ''}
+      ${
+        !p.isChampions
+          ? `<p class="podium-note">Belum ada Champions tahun ini, jadi podium memakai ${esc(
+              w.name
+            )}.</p>`
+          : ''
+      }
       <div class="podium-row p1">
         <span class="podium-rank">1</span>${teamLink(w.winner, 'podium-team')}
         <span class="podium-score">${scoreText(w)}</span>
@@ -617,7 +623,8 @@
 
       <h2 class="dash-title">Podium per tahun</h2>
       <div class="podium-grid">${PODIUMS.map(podiumCard).join('')}</div>
-      <p class="chart-note">Podium event utama tiap tahun: Champions 2021–2025; 2026 memakai Masters terakhir.</p>
+      <p class="chart-note">Podium diambil dari Champions tiap tahun. Khusus 2026, Champions belum
+        digelar, jadi dipakai Masters terakhir.</p>
 
       <h2 class="dash-title">Champions</h2>
       <div class="champ-grid">${CHAMPIONS.map(champCard).join('')}</div>
@@ -633,8 +640,8 @@
         .slice(0, 8)
         .map(titleRow)
         .join('')}</div>
-      <p class="chart-note">Fokus 16 major VCT. Arsip lengkap 235 turnamen tetap tersedia di
-        <a href="#/data">Jelajah Data</a>.</p>
+      <p class="chart-note">Halaman ini fokus ke 16 major VCT. Data 235 turnamen tetap bisa dibuka di
+        <a href="#/data">Arsip Data</a>.</p>
     `;
 
     initWinHero();
@@ -790,8 +797,8 @@
         `${rows.length} tim pernah menjuarai VCT major · ${MAJORS.length} gelar`
       )}
       <div class="winner-table">${titleHead}${rows.map(titleRow).join('')}</div>
-      <p class="chart-note">Gelar major = VCT Champions atau Masters. Gelar regional/Challengers
-        tetap tercatat di halaman masing-masing tim.</p>
+      <p class="chart-note">Di sini hanya dihitung gelar major, yaitu Champions dan Masters.
+        Gelar regional tetap ada di halaman tiap tim.</p>
     `;
   }
 
@@ -828,7 +835,7 @@
           )
           .join('')}
       </div>
-      <p class="chart-note">Termasuk pemain pengganti yang tampil untuk tim juara di turnamen tersebut.</p>
+      <p class="chart-note">Termasuk pemain pengganti yang sempat tampil untuk tim juara.</p>
     `;
   }
 
@@ -889,7 +896,7 @@
                 )
                 .join('') || '<p class="chart-note">Belum ada trofi pada arsip ini.</p>'
             }</div>
-            <p class="rd-method">Penghargaan = gelar turnamen. Dataset tidak memuat MVP atau penghargaan individu.</p>
+            <p class="rd-method">Yang dihitung sebagai penghargaan hanya gelar turnamen. Dataset ini tidak punya data MVP atau penghargaan individu.</p>
 
             <div class="panel-head" style="margin-top:18px"><h2 class="panel-title">Performa</h2><span class="panel-note">seluruh turnamen</span></div>
             <div class="rd-stats">
@@ -1017,7 +1024,7 @@
                 )
                 .join('') || '<p class="chart-note">Belum ada trofi.</p>'
             }</div>
-            <p class="rd-method">Gelar major dihitung dari roster tim juara. Dataset tidak memuat MVP atau penghargaan individu.</p>
+            <p class="rd-method">Gelar major dihitung dari roster tim yang menang. Dataset ini tidak punya data MVP atau penghargaan individu.</p>
 
             <div class="panel-head" style="margin-top:18px"><h2 class="panel-title">Laga terakhir</h2></div>
             <div class="match-list">${

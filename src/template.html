@@ -40,7 +40,7 @@
 
   <div class="page-head">
     <div>
-      <h1>VALORANT Esports Overview</h1>
+      <h1>Arsip Data</h1>
       <p class="page-sub" id="pageSub">{{MAPGAMES}} map dimainkan · {{MATCHES}} pertandingan · {{TOURNAMENTS}} turnamen · {{TEAMS}} tim</p>
     </div>
     <div class="filter-field filter-years">
@@ -284,35 +284,30 @@
     <div class="footer-grid">
       <div>
         <h2 class="footer-title">Sumber data</h2>
-        <p>VLR.gg — dataset <a href="https://www.kaggle.com/datasets/ryanluong1/valorant-champion-tour-2021-2023-data" target="_blank" rel="noopener">“Valorant Champion Tour 2021–2026 Data”</a> oleh Ryan Luong (Kaggle, MIT), di-scrape dari vlr.gg.</p>
-        <p>Tabel: <code>all_ids</code>, <code>matches/scores.csv</code> (pemenang), <code>matches/overview.csv</code> (lineup &amp; performa).</p>
-        <p>Logo event/tim dan foto pemain: VLR.gg (og:image), diperkecil dan disematkan.</p>
+        <p>Semua angka di halaman ini diolah dari arsip pertandingan VLR.gg. Dataset-nya dirilis Ryan Luong di <a href="https://www.kaggle.com/datasets/ryanluong1/valorant-champion-tour-2021-2023-data" target="_blank" rel="noopener">Kaggle</a> dengan lisensi MIT.</p>
+        <p>Tabel yang dipakai: <code>all_ids</code>, <code>matches/scores.csv</code>, dan <code>matches/overview.csv</code>.</p>
+        <p>Logo tim, logo event, dan foto pemain juga diambil dari VLR.gg. Ukurannya diperkecil supaya file tetap ringan.</p>
       </div>
       <div>
-        <h2 class="footer-title">Metode</h2>
-        <ul>
-          <li>{{RAWROWS}} baris dibaca · {{EXCLUDED}} dikeluarkan (peta kosong/<code>TBD</code>).</li>
-          <li>Turnamen = nama unik: {{TOURNAMENTS}} nama, {{TOURNAMENT_IDS}} ID ({{DUP_TOURNAMENTS}} nama punya dua ID).</li>
-          <li>Pemenang = skor final dari <code>scores.csv</code>; final dideteksi dari match type (Grand Final/Final).</li>
-          <li>Performa pemain = agregat <code>overview.csv</code> per turnamen (rating, ACS, K/D, W–L).</li>
-          <li>Wilayah = kata kunci nama turnamen.</li>
-          <li>Varian <em>Open Qualifier #1/#2</em> digabung.</li>
-        </ul>
+        <h2 class="footer-title">Cara mengolah</h2>
+        <p>Dari {{RAWROWS}} baris, {{EXCLUDED}} dibuang karena nama petanya kosong atau masih <code>TBD</code>.</p>
+        <p>Turnamen dihitung dari nama unik: {{TOURNAMENTS}} nama. Jumlah ID-nya {{TOURNAMENT_IDS}} karena {{DUP_TOURNAMENTS}} nama tercatat dua kali.</p>
+        <p>Juara ditentukan dari skor final, dan finalnya dicari lewat jenis laga (Grand Final atau Final).</p>
+        <p>Performa pemain dirangkum per turnamen dari <code>overview.csv</code>: rating, ACS, K/D, dan rekor menang-kalah.</p>
+        <p>Wilayah ditebak dari kata kunci nama turnamen. Varian Open Qualifier #1 dan #2 digabung.</p>
       </div>
       <div>
-        <h2 class="footer-title">Keterbatasan</h2>
-        <ul>
-          <li>Juara hanya diisi bila final &amp; skornya terdeteksi; beberapa turnamen liga tanpa final.</li>
-          <li>Partisipasi pemain per pertandingan, bukan per peta; beberapa laga tanpa data lineup.</li>
-          <li>Cakupan tidak merata ({{COVERAGE}}% di 2021–2022).</li>
-          <li>Data {{YEAR_MAX}} kemungkinan belum lengkap.</li>
-          <li>Wilayah heuristik; tier turnamen dikurasi manual untuk major.</li>
-        </ul>
+        <h2 class="footer-title">Yang perlu diketahui</h2>
+        <p>Tidak semua turnamen punya final yang jelas, jadi sebagian tidak punya juara.</p>
+        <p>Partisipasi pemain dicatat per pertandingan, bukan per peta. Sebagian laga juga tidak punya data lineup.</p>
+        <p>Arsip belum merata: {{COVERAGE}}% data berasal dari 2021–2022, dan data {{YEAR_MAX}} kemungkinan belum lengkap.</p>
+        <p>Wilayah masih perkiraan. Tier major ditentukan manual, bukan dari dataset.</p>
+        <p>Penghargaan di halaman tim dan pemain hanya berarti gelar turnamen. Dataset ini tidak punya data MVP atau penghargaan individu.</p>
       </div>
     </div>
     <div class="colophon">
       <span>Infografis Interaktif · Seni Presentasi Berbasis Data · 2026</span>
-      <span>HTML, CSS, SVG — tanpa pustaka eksternal</span>
+      <span>Dibuat dengan HTML, CSS, dan SVG, tanpa pustaka eksternal.</span>
     </div>
   </div>
 </footer>

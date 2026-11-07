@@ -1213,7 +1213,8 @@
         f(pct(VIEW.insights.coverage2021_2022), 'Data 2021–2022', 'cakupan arsip tidak merata'),
         f(pct(VIEW.insights.openQualifierShare), 'Open Qualifier', 'stage dengan map terbanyak'),
         f(pct(singleShare), '1 peta per laga', 'kemungkinan arsip tidak lengkap'),
-      ].join('') + '<p class="findings-note">Tanpa skor/pemenang — tidak ada analisis hasil.</p>';
+      ].join('') +
+      '<p class="findings-note">Dashboard ini menjelaskan struktur arsip. Hasil pertandingan dan juaranya ada di halaman Juara.</p>';
   }
 
   /* ------------------------------ header & status ------------------------------ */
