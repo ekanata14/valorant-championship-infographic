@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="id" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Juara VCT {{YEAR_MIN}}–{{YEAR_MAX}} — Infografis Interaktif</title>
+<meta name="description" content="Siapa juara VCT Champions, Masters, dan turnamen VALORANT lain {{YEAR_MIN}}–{{YEAR_MAX}}: tim, roster, skor final, performa, dan detail pemain.">
+<meta name="color-scheme" content="light dark">
+<style>
+/*STYLES*/
+</style>
+</head>
+<body>
+<a class="sr-only" href="#main">Lewati ke konten utama</a>
+
+<header class="appbar">
+  <div class="appbar-inner">
+    <div class="brand">
+      <span class="dot" aria-hidden="true"></span>
+      <b>VALORANT Data</b>
+      <span class="brand-sub">Esports {{YEAR_MIN}}–{{YEAR_MAX}}</span>
+    </div>
+    <nav class="tabs" aria-label="Navigasi utama">
+      <a href="#/">Juara</a>
+      <a href="#/vct">VCT</a>
+      <a href="#/lainnya">Turnamen lain</a>
+      <a href="#/data">Jelajah Data</a>
+    </nav>
+    <div class="appbar-tools">
+      <span class="updated">{{RAWROWS}} baris · VLR.gg</span>
+      <button class="btn-theme" id="themeBtn" type="button">Dark mode</button>
+    </div>
+  </div>
+  <div id="progress" aria-hidden="true"></div>
+</header>
+
+<main id="main">
+  <div id="appView"></div>
+  <div id="dashboard" hidden>
+
+  <div class="page-head">
+    <div>
+      <h1>VALORANT Esports Overview</h1>
+      <p class="page-sub" id="pageSub">{{MAPGAMES}} map dimainkan · {{MATCHES}} pertandingan · {{TOURNAMENTS}} turnamen · {{TEAMS}} tim</p>
+    </div>
+    <div class="filter-field filter-years">
+      <span class="filter-label">Tahun</span>
+      <div class="chip-group" id="yearChips" role="group" aria-label="Filter tahun">
+        {{YEAR_CHIPS}}
+      </div>
+    </div>
+  </div>
+
+  <div class="filterbar" id="filters" role="region" aria-label="Filter data">
+    <label class="filter-field">
+      <span class="filter-label">Wilayah</span>
+      <select id="fRegion"></select>
+    </label>
+    <label class="filter-field">
+      <span class="filter-label">Stage</span>
+      <select id="fStage"></select>
+    </label>
+    <label class="filter-field">
+      <span class="filter-label">Peta</span>
+      <select id="fMap"></select>
+    </label>
+    <label class="filter-field">
+      <span class="filter-label">Turnamen</span>
+      <select id="fTournament"></select>
+    </label>
+    <label class="filter-field">
+      <span class="filter-label">Tim</span>
+      <select id="fTeam"></select>
+    </label>
+    <div class="filter-field filter-player">
+      <label class="filter-label" for="fPlayer">Pemain</label>
+      <span class="combo">
+        <input id="fPlayer" type="text" placeholder="Cari pemain…" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="playerResults">
+        <button class="combo-clear" id="playerClear" type="button" aria-label="Hapus filter pemain" hidden>×</button>
+        <ul class="combo-list" id="playerResults" role="listbox" hidden></ul>
+      </span>
+    </div>
+    <button class="chip-reset filter-reset" id="resetFilters" type="button">Reset</button>
+  </div>
+  <p class="filter-status" id="filterStatus"></p>
+  <div class="empty-state" id="emptyState" hidden>Tidak ada data untuk kombinasi filter ini.</div>
+
+  <div class="kpis" id="kpis" role="group" aria-label="Indikator utama dataset"></div>
+
+  <div class="dash">
+
+    <article class="panel col-8" id="cardSkala">
+      <div class="panel-body">
+        <div class="panel-head">
+          <h2 class="panel-title">Volume per tahun</h2>
+          <div class="seg" id="metricToggle" role="group" aria-label="Pilih metrik">
+            <button type="button" data-metric="mapGames" aria-pressed="true">Map dimainkan</button>
+            <button type="button" data-metric="matches" aria-pressed="false">Pertandingan</button>
+          </div>
+        </div>
+        <div class="chart" id="scaleChart"></div>
+        <p class="chart-note" id="scaleNote"></p>
+        <details class="data-table" id="scaleTable"></details>
+      </div>
+    </article>
+
+    <article class="panel col-4">
+      <div class="panel-body">
+        <div class="panel-head">
+          <h2 class="panel-title">Ringkasan skala</h2>
+        </div>
+        <div class="stat-rows" id="factsSkala"></div>
+      </div>
+    </article>
+
+    <article class="panel col-8" id="cardPeta">
+      <div class="panel-body">
+        <div class="panel-head">
+          <h2 class="panel-title">Peta × tahun</h2>
+          <span class="panel-note">warna makin pekat = makin sering</span>
+        </div>
+        <div class="chart" id="heatmap"></div>
+        <div class="insight" id="mapInsight" hidden></div>
+        <details class="data-table" id="mapTable"></details>
+      </div>
+    </article>
+
+    <article class="panel col-4">
+      <div class="panel-body">
+        <div class="panel-head">
+          <h2 class="panel-title">Jejak tiap peta</h2>
+          <span class="panel-note">klik untuk sorot</span>
+        </div>
+        <div class="map-grid" id="mapGrid" role="group" aria-label="Daftar peta"></div>
+        <p class="chart-note">Garis: {{YEAR_MIN}} → {{YEAR_MAX}}.</p>
+      </div>
+    </article>
+
+    <article class="panel col-6" id="cardStruktur">
+      <div class="panel-body">
+        <div class="panel-head">
+          <h2 class="panel-title">Map per jenis stage</h2>
+          <span class="panel-note" id="noteStruktur"></span>
+        </div>
+        <div class="chart" id="stageChart"></div>
+        <details class="data-table" id="stageTable"></details>
+      </div>
+    </article>
+
+    <article class="panel col-6">
+      <div class="panel-body">
+        <div class="panel-head">
+          <h2 class="panel-title">Peta per pertandingan</h2>
+          <span class="panel-note">seluruh periode</span>
+        </div>
+        <div id="formatChart" class="format-list"></div>
+        <p class="chart-note" id="formatNote"></p>
+        <div class="stat-rows format-stats" id="formatStats"></div>
+      </div>
+    </article>
+
+    <article class="panel col-7" id="cardWilayah">
+      <div class="panel-body">
+        <div class="panel-head">
+          <h2 class="panel-title">Porsi map per wilayah</h2>
+          <span class="panel-note">heuristik dari nama turnamen</span>
+        </div>
+        <div class="region-chart" id="regionChart" role="group" aria-label="Porsi map dimainkan per wilayah"></div>
+        <details class="data-table" id="regionTable"></details>
+      </div>
+    </article>
+
+    <article class="panel col-5">
+      <div class="panel-body">
+        <div class="panel-head">
+          <h2 class="panel-title">Detail wilayah</h2>
+          <span class="panel-note" id="regionNote">wilayah teratas</span>
+        </div>
+        <div class="region-detail" id="regionDetail"></div>
+      </div>
+    </article>
+
+    <article class="panel col-12" id="cardTim">
+      <div class="panel-body">
+        <div class="panel-head">
+          <h2 class="panel-title">Pertandingan per tim</h2>
+          <div class="search">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4.3-4.3"></path>
+            </svg>
+            <label class="sr-only" for="teamInput">Cari tim</label>
+            <input id="teamInput" type="search" placeholder="Cari tim… (Esc reset)" autocomplete="off">
+          </div>
+        </div>
+        <div class="chart" id="teamChart"></div>
+        <p class="chart-note" id="teamCount"></p>
+        <details class="data-table" id="teamTable"></details>
+      </div>
+    </article>
+
+    <article class="panel col-8" id="cardPemain">
+      <div class="panel-body">
+        <div class="panel-head">
+          <h2 class="panel-title">Pemain paling sering tampil</h2>
+          <span class="panel-note">klik untuk memfilter</span>
+        </div>
+        <div class="chart" id="playerChart"></div>
+        <p class="chart-note" id="playerCount"></p>
+        <details class="data-table" id="playerTable"></details>
+      </div>
+    </article>
+
+    <article class="panel col-4">
+      <div class="panel-body">
+        <div class="panel-head">
+          <h2 class="panel-title">Detail pemain</h2>
+          <span class="panel-note" id="playerNote">pemain teratas</span>
+        </div>
+        <div class="region-detail" id="playerDetail"></div>
+      </div>
+    </article>
+
+  </div>
+
+  <h2 class="dash-title" id="cardData">Cari data</h2>
+  <div class="dash" id="dataGrid">
+    <article class="panel col-8">
+      <div class="panel-body">
+        <div class="panel-head">
+          <div class="seg" id="dataTabs" role="group" aria-label="Jenis data">
+            <button type="button" data-type="player" aria-pressed="true">Pemain</button>
+            <button type="button" data-type="match" aria-pressed="false">Pertandingan</button>
+            <button type="button" data-type="team" aria-pressed="false">Tim</button>
+            <button type="button" data-type="tournament" aria-pressed="false">Turnamen</button>
+          </div>
+          <div class="search">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4.3-4.3"></path>
+            </svg>
+            <label class="sr-only" for="dataSearch">Cari data</label>
+            <input id="dataSearch" type="search" placeholder="Cari nama, laga, turnamen…" autocomplete="off">
+          </div>
+        </div>
+        <div class="data-table" id="dataTable">
+          <div class="data-head" id="dataHead"></div>
+          <div class="data-rows" id="dataRows"></div>
+        </div>
+        <p class="chart-note" id="dataCount"></p>
+      </div>
+    </article>
+
+    <article class="panel col-4">
+      <div class="panel-body">
+        <div class="panel-head">
+          <h2 class="panel-title" id="dataDetailTitle">Detail</h2>
+          <span class="panel-note" id="dataDetailNote"></span>
+        </div>
+        <div class="region-detail" id="dataDetail"></div>
+      </div>
+    </article>
+  </div>
+
+  <h2 class="dash-title" id="cardTemuan">Temuan</h2>
+  <div class="findings" id="closing"></div>
+
+  </div>
+
+  <noscript>
+    <div class="panel" style="margin-top:14px">
+      <div class="panel-body">
+        <h2 class="panel-title" style="margin-bottom:8px">Ringkasan tanpa JavaScript</h2>
+        <p class="page-sub">
+          {{MAPGAMES}} map dimainkan · {{MATCHES}} pertandingan · {{TOURNAMENTS}} turnamen ·
+          {{MAPS}} peta · {{TEAMS}} tim · {{PLAYERS}} pemain, {{YEAR_MIN}}–{{YEAR_MAX}}.
+        </p>
+      </div>
+    </div>
+  </noscript>
+
+</main>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div>
+        <h2 class="footer-title">Sumber data</h2>
+        <p>VLR.gg — dataset <a href="https://www.kaggle.com/datasets/ryanluong1/valorant-champion-tour-2021-2023-data" target="_blank" rel="noopener">“Valorant Champion Tour 2021–2026 Data”</a> oleh Ryan Luong (Kaggle, MIT), di-scrape dari vlr.gg.</p>
+        <p>Tabel: <code>all_ids</code>, <code>matches/scores.csv</code> (pemenang), <code>matches/overview.csv</code> (lineup &amp; performa).</p>
+        <p>Logo event/tim dan foto pemain: VLR.gg (og:image), diperkecil dan disematkan.</p>
+      </div>
+      <div>
+        <h2 class="footer-title">Metode</h2>
+        <ul>
+          <li>{{RAWROWS}} baris dibaca · {{EXCLUDED}} dikeluarkan (peta kosong/<code>TBD</code>).</li>
+          <li>Turnamen = nama unik: {{TOURNAMENTS}} nama, {{TOURNAMENT_IDS}} ID ({{DUP_TOURNAMENTS}} nama punya dua ID).</li>
+          <li>Pemenang = skor final dari <code>scores.csv</code>; final dideteksi dari match type (Grand Final/Final).</li>
+          <li>Performa pemain = agregat <code>overview.csv</code> per turnamen (rating, ACS, K/D, W–L).</li>
+          <li>Wilayah = kata kunci nama turnamen.</li>
+          <li>Varian <em>Open Qualifier #1/#2</em> digabung.</li>
+        </ul>
+      </div>
+      <div>
+        <h2 class="footer-title">Keterbatasan</h2>
+        <ul>
+          <li>Juara hanya diisi bila final &amp; skornya terdeteksi; beberapa turnamen liga tanpa final.</li>
+          <li>Partisipasi pemain per pertandingan, bukan per peta; beberapa laga tanpa data lineup.</li>
+          <li>Cakupan tidak merata ({{COVERAGE}}% di 2021–2022).</li>
+          <li>Data {{YEAR_MAX}} kemungkinan belum lengkap.</li>
+          <li>Wilayah heuristik; tier turnamen dikurasi manual untuk major.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="colophon">
+      <span>Infografis Interaktif · Seni Presentasi Berbasis Data · 2026</span>
+      <span>HTML, CSS, SVG — tanpa pustaka eksternal</span>
+    </div>
+  </div>
+</footer>
+
+<div id="tooltip" role="status" aria-live="polite"></div>
+
+<script id="data" type="application/json">/*DATA*/</script>
+<script>
+/*CHARTS*/
+</script>
+<script>
+/*APP*/
+</script>
+<script>
+/*VIEWS*/
+</script>
+</body>
+</html>
