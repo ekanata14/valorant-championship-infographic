@@ -294,7 +294,10 @@
   const playerChip = (p, tix) => {
     const rec = perfFor(p, tix);
     const r = ratingOf(rec);
-    return `<a class="chip-player with-logo" href="#/player/${p}">${imgOr(
+    const tip = `${P_NAMES[p]}\n${r ? `Rating ${r.toFixed(2)}` : 'Tanpa data rating'}${
+      rec ? `\n${rec.maps} peta di turnamen ini` : ''
+    }`;
+    return `<a class="chip-player with-logo" href="#/player/${p}" data-tip="${esc(tip)}">${imgOr(
       'players',
       P_NAMES[p],
       'avatar-player'
@@ -510,8 +513,12 @@
         </div>
         ${
           top
-            .map(
-              (r, i) => `<div class="win-row">
+            .map((r, i) => {
+              const scope = winYear === 'all' ? '16 major VCT' : `Major ${winYear}`;
+              const tip = `${F.teams[r.id]}\n${r.w} menang · ${r.l} kalah\nWin rate ${pct(
+                r.rate
+              )}\n${scope}`;
+              return `<div class="win-row" data-tip="${esc(tip)}">
                 <span class="win-rank">${i + 1}</span>
                 <a class="win-team" href="#/team/${r.id}">${imgOr(
                   'teams',
@@ -526,8 +533,8 @@
                 <span class="win-val">${r.w}</span>
                 <span class="win-val">${r.l}</span>
                 <span class="win-rate">${pct(r.rate)}</span>
-              </div>`
-            )
+              </div>`;
+            })
             .join('') || '<p class="chart-note">Tidak ada data pada filter ini.</p>'
         }
       </div>
@@ -535,7 +542,7 @@
         leader
           ? `${
               winMetric === 'losses' ? 'Paling banyak kalah' : 'Paling banyak menang'
-            }: ${esc(F.teams[leader.id])} (${leader.w} menang, ${leader.l} kalah). Angka ini hanya dari 16 major VCT.`
+            }: ${esc(F.teams[leader.id])} (${leader.w} menang, ${leader.l} kalah). Angka ini hanya dari 16 major VCT. Klik nama tim untuk detail.`
           : ''
       }</p>
     `;
