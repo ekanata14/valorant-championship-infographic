@@ -3,8 +3,10 @@
 Satu file HTML mandiri yang menjawab satu pertanyaan utama:
 **siapa juara 16 major VCT (Champions & Masters), dengan siapa pemainnya, dan bagaimana performanya.**
 
-Cakupan sorotan: **16 major VCT**. Setiap juara menampilkan tim, roster, skor final, performa,
-serta tautan ke **halaman tim** dan **halaman pemain**.
+Cakupan sorotan: **16 major VCT**. Di bagian atas, **statistik menang–kalah tiap tim**
+(bisa difilter tahun/tim dan diurutkan menang/kalah); di bawahnya **podium 1–3 setiap tahun**.
+Setiap juara menampilkan tim, roster, skor final, performa, serta tautan ke **halaman tim**
+dan **halaman pemain**.
 Data lengkap **235 turnamen** (regional, Challengers, pihak ketiga) tetap utuh dan dapat diakses
 di **Arsip Data** — tidak dihapus, hanya tidak lagi menjadi cerita utama.
 
@@ -18,7 +20,7 @@ Tidak ada request jaringan. Rute hash di dalam satu file:
 
 | Rute | Isi |
 |---|---|
-| `#/` | Juara: hero major terbaru, 5 kartu Champions, 11 kartu Masters, papan gelar tim |
+| `#/` | Juara: statistik kemenangan tim (filter tahun/tim, urut menang/kalah), podium 1–3 per tahun, kartu Champions/Masters, papan gelar |
 | `#/teams` | Papan gelar major: tim juara, jumlah gelar, final, tahun |
 | `#/players` | Pemain yang pernah menjuarai major (roster tim juara) |
 | `#/team/<id>` | Halaman tim: penghargaan (major/final/total), performa, roster, laga terakhir |
@@ -102,6 +104,10 @@ Tanpa folder `dataset/kaggle`, build tetap jalan, tetapi juara/performa kosong.
 
 ## Fitur
 
+- **Statistik kemenangan tim**: W–L seluruh laga 16 major; filter tahun & tim, urutkan
+  menang/kalah; KPI total laga/menang/kalah/tim dan 10 bar teratas.
+- **Podium per tahun**: juara 1–2–3 tiap tahun (Champions 2021–2025; 2026 memakai Masters
+  terakhir). Juara 3 dari Lower Final, atau 3–4 jika turnamen memakai semifinal.
 - **Juara**: 16 major (5 Champions, 11 Masters) dengan tim, runner-up, skor final, roster,
   dan performa tim di turnamen (peta, rating, ACS).
 - **Papan gelar**: tim juara major, jumlah gelar, final, dan tahun; setiap baris menuju halaman tim.
@@ -127,6 +133,9 @@ foto 89 pemain (40 teratas + roster final major).
 ## Keterbatasan
 
 - **Sorotan dibatasi ke 16 major VCT**; 219 turnamen lain tetap ada di Arsip Data.
+- Juara 3 diturunkan dari **Lower Final** (double elimination) atau kedua **semifinal**
+  (ditampilkan sebagai 3–4), bukan dari match perebutan peringkat ketiga.
+- **2026 belum memiliki Champions**; podium 2026 memakai Masters terakhir.
 - Penghargaan di halaman tim/pemain = **gelar turnamen**; dataset tidak memuat MVP/penghargaan individu.
 - Juara hanya diisi bila **final & skor** terdeteksi; turnamen liga tanpa final tidak punya juara.
 - Performa dari `overview.csv`; sebagian kecil laga tidak punya data lineup/performa.

@@ -200,6 +200,8 @@ def main():
         winner = runner = None
         score = None
         stage = None
+        third = []
+        third_label = None
         if final_mi is not None:
             mid = match_ids[final_mi]
             info = match_order[mid]
@@ -226,6 +228,53 @@ def main():
                     if winner is None:
                         confidence = "low"
 
+        # juara 3: loser Lower Final (double elim) atau kedua loser Semifinal
+        if final_mi is not None and stage is not None:
+            stage_ids = [
+                mi for mi in ids
+                if match_order[match_ids[mi]]["stage"] == stage
+            ]
+
+            def loser_of(mi):
+                info = match_order[match_ids[mi]]
+                s = scores.get((info["tour"], info["stage"], info["type"], info["name"]))
+                if not s:
+                    return None
+                side = None
+                if s["a"] is not None and s["b"] is not None:
+                    side = 0 if s["a"] > s["b"] else 1 if s["b"] > s["a"] else None
+                elif s["result"]:
+                    res = s["result"].lower()
+                    if info["teamA"].lower() in res:
+                        side = 0
+                    elif info["teamB"].lower() in res:
+                        side = 1
+                if side is None:
+                    return None
+                loser_name = info["teamB"] if side == 0 else info["teamA"]
+                return team_index.get(loser_name)
+
+            lower = [
+                mi for mi in stage_ids
+                if match_order[match_ids[mi]]["type"].strip().lower() == "lower final"
+            ]
+            semis = [
+                mi for mi in stage_ids
+                if "semifinal" in match_order[match_ids[mi]]["type"].strip().lower()
+            ]
+            if lower:
+                t = loser_of(lower[0])
+                if t is not None:
+                    third = [t]
+                    third_label = "3"
+            elif semis:
+                for mi in semis:
+                    t = loser_of(mi)
+                    if t is not None and t not in third:
+                        third.append(t)
+                if third:
+                    third_label = "3–4" if len(third) > 1 else "3"
+
         tournaments.append(
             {
                 "name": name,
@@ -234,6 +283,8 @@ def main():
                 "region": region,
                 "winner": winner,
                 "runnerUp": runner,
+                "third": third,
+                "thirdLabel": third_label,
                 "score": score,
                 "finalMatch": match_ids[final_mi] if final_mi is not None else None,
                 "stage": stage,

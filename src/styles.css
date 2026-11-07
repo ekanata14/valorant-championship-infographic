@@ -1109,11 +1109,134 @@ a.player-title-row:hover { background: var(--panel-2); }
 .perf-team a { color: var(--muted); text-decoration: none; }
 .perf-team a:hover { color: var(--red); }
 
+/* ---------- win stats hero ---------- */
+
+.win-hero { border-top: 3px solid var(--red); margin-bottom: 14px; }
+.win-hero-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.win-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.win-controls .filter-field select { max-width: 180px; }
+.win-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+.win-kpis > div { background: var(--panel); padding: 10px 12px; }
+.win-kpis b {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 22px;
+  line-height: 1.1;
+  color: var(--cream);
+  font-variant-numeric: tabular-nums;
+}
+.win-kpis span {
+  display: block;
+  margin-top: 3px;
+  font-size: 10px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+}
+.win-table { border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+.win-row {
+  display: grid;
+  grid-template-columns: 26px minmax(140px, 1.2fr) minmax(60px, 1fr) 44px 44px 50px;
+  gap: 10px;
+  align-items: center;
+  padding: 7px 10px;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+}
+.win-row:first-child { border-top: 0; }
+.win-head {
+  background: var(--panel-2);
+  color: var(--muted-2);
+  font-size: 10px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.win-head span:nth-child(4), .win-head span:nth-child(5), .win-head span:nth-child(6) {
+  text-align: right;
+}
+.win-rank { color: var(--muted-2); font-variant-numeric: tabular-nums; }
+.win-team {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  color: var(--cream);
+  text-decoration: none;
+  font-weight: 600;
+}
+.win-team span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.win-team:hover { color: var(--red); }
+.win-bar { display: block; height: 12px; background: var(--panel-2); border-radius: 2px; overflow: hidden; }
+.win-bar > span { display: block; height: 100%; }
+.win-val { text-align: right; font-variant-numeric: tabular-nums; color: var(--cream); }
+.win-rate { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+
+/* ---------- podium per tahun ---------- */
+
+.podium-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.podium-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--red);
+  border-radius: 6px;
+  box-shadow: var(--shadow);
+  padding: 14px 16px 10px;
+}
+.podium-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.podium-year {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--cream);
+  line-height: 1;
+}
+.podium-event { font-size: 11px; color: var(--muted-2); text-align: right; min-width: 0; }
+.podium-note { font-size: 10px; color: var(--muted-2); margin-top: 6px; }
+.podium-row {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 0;
+  border-top: 1px solid var(--line);
+  font-size: 13px;
+}
+.podium-row.p1 { border-top: 0; }
+.podium-rank {
+  font-family: var(--font-display);
+  font-size: 16px;
+  text-align: center;
+  color: var(--muted-2);
+  white-space: nowrap;
+}
+.podium-row.p1 .podium-rank { color: var(--red); }
+.podium-team { font-weight: 600; color: var(--cream); text-decoration: none; }
+.podium-team:hover { color: var(--red); }
+.podium-score { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 12px; }
+.podium-third { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; min-width: 0; }
+
 /* ---------- responsive ---------- */
 
 @media (max-width: 1180px) {
   .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .champ-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .podium-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 1000px) {
@@ -1145,6 +1268,13 @@ a.player-title-row:hover { background: var(--panel-2); }
   .data-table { overflow: visible; }
   .data-head, .data-row { min-width: 0; }
   .champ-grid { grid-template-columns: 1fr; }
+  .podium-grid { grid-template-columns: 1fr; }
+  .win-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .win-row { grid-template-columns: 24px minmax(0, 1fr) 40px 40px 46px; gap: 8px; padding: 6px 8px; }
+  .win-row > span:nth-child(3) { display: none; }
+  .win-controls { width: 100%; }
+  .win-controls .filter-field { flex: 1 1 130px; }
+  .win-controls .filter-field select { max-width: none; width: 100%; }
   .champ-hero .panel-body { flex-direction: column; align-items: flex-start; gap: 10px; }
   .champ-hero-score { font-size: 48px; }
   .winner-row { grid-template-columns: 46px minmax(0, 1fr) 120px 48px; gap: 8px; padding: 7px 9px; }

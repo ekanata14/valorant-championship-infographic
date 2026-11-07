@@ -207,6 +207,54 @@
           P_NAMES[a.p].localeCompare(P_NAMES[b.p])
       );
 
+  // statistik menang–kalah per tim, hanya dari 16 major
+  const MAJOR_TIX = new Set(MAJORS.map((w) => TOUR_IDX.get(w.name)).filter((x) => x != null));
+  const TEAM_MAJOR = new Map();
+  for (let m = 0; m < MATCH_N; m++) {
+    if (!MAJOR_TIX.has(A.matchTour[m])) continue;
+    const win = RES[m] ? +RES[m] : 2;
+    if (win === 2) continue;
+    const year = F.years[A.matchYear[m]];
+    for (const [side, id] of [
+      [0, A.matchTeamA[m]],
+      [1, A.matchTeamB[m]],
+    ]) {
+      if (id === TEAM_NONE) continue;
+      let entry = TEAM_MAJOR.get(id);
+      if (!entry) {
+        entry = { wins: 0, losses: 0, byYear: new Map() };
+        TEAM_MAJOR.set(id, entry);
+      }
+      let y = entry.byYear.get(year);
+      if (!y) {
+        y = { wins: 0, losses: 0 };
+        entry.byYear.set(year, y);
+      }
+      if (win === side) {
+        entry.wins++;
+        y.wins++;
+      } else {
+        entry.losses++;
+        y.losses++;
+      }
+    }
+  }
+
+  const MAJOR_YEARS = [...new Set(MAJORS.map((w) => w.year))].sort((a, b) => b - a);
+
+  const PODIUMS = [...new Set(MAJORS.map((w) => w.year))]
+    .sort((a, b) => a - b)
+    .map((year) => {
+      const champs = CHAMPIONS.find((w) => w.year === year);
+      const event =
+        champs ||
+        MAJORS.filter((w) => w.year === year).sort(
+          (a, b) => Number(b.finalMatch || 0) - Number(a.finalMatch || 0)
+        )[0];
+      return event ? { year, event, isChampions: !!champs } : null;
+    })
+    .filter(Boolean);
+
   const titleHead = `<div class="title-row title-head">
     <span>#</span><span></span><span>Tim</span><span>Gelar</span><span>Tahun</span><span>Final</span>
   </div>`;
@@ -370,12 +418,192 @@
 
   /* ------------------------------ home ------------------------------ */
 
+  let winYear = 'all';
+  let winTeam = 'all';
+  let winMetric = 'wins';
+
+  function winStats() {
+    let totalW = 0;
+    let totalL = 0;
+    const rows = [];
+    for (const [id, entry] of TEAM_MAJOR) {
+      if (winTeam !== 'all' && String(id) !== String(winTeam)) continue;
+      let w = entry.wins;
+      let l = entry.losses;
+      if (winYear !== 'all') {
+        const y = entry.byYear.get(Number(winYear));
+        w = y ? y.wins : 0;
+        l = y ? y.losses : 0;
+      }
+      if (w + l === 0) continue;
+      rows.push({ id, w, l, rate: w / (w + l) });
+      totalW += w;
+      totalL += l;
+    }
+    rows.sort((a, b) =>
+      winMetric === 'losses'
+        ? b.l - a.l || b.rate - a.rate || F.teams[a.id].localeCompare(F.teams[b.id])
+        : b.w - a.w || b.rate - a.rate || F.teams[a.id].localeCompare(F.teams[b.id])
+    );
+    return { rows, totalW, totalL, totalM: totalW + totalL };
+  }
+
+  function winHeroHtml() {
+    const teamOptions = [...TEAM_MAJOR.entries()]
+      .sort((a, b) => b[1].wins - a[1].wins || F.teams[a[0]].localeCompare(F.teams[b[0]]))
+      .map(
+        ([id]) =>
+          `<option value="${id}"${String(winTeam) === String(id) ? ' selected' : ''}>${esc(
+            F.teams[id]
+          )}</option>`
+      )
+      .join('');
+    const yearOptions = MAJOR_YEARS.map(
+      (y) =>
+        `<option value="${y}"${String(winYear) === String(y) ? ' selected' : ''}>${y}</option>`
+    ).join('');
+    return `<article class="win-hero panel"><div class="panel-body">
+      <div class="win-hero-head">
+        <div>
+          <h2 class="panel-title">Statistik kemenangan tim</h2>
+          <p class="panel-note">16 major VCT · menang–kalah laga</p>
+        </div>
+        <div class="win-controls">
+          <label class="filter-field"><span class="filter-label">Tahun</span>
+            <select id="winYear"><option value="all"${
+              winYear === 'all' ? ' selected' : ''
+            }>Semua</option>${yearOptions}</select>
+          </label>
+          <label class="filter-field"><span class="filter-label">Tim</span>
+            <select id="winTeam"><option value="all"${
+              winTeam === 'all' ? ' selected' : ''
+            }>Semua tim</option>${teamOptions}</select>
+          </label>
+          <div class="seg" id="winMetric" role="group" aria-label="Urutkan">
+            <button type="button" data-win-metric="wins" aria-pressed="${winMetric === 'wins'}">Menang</button>
+            <button type="button" data-win-metric="losses" aria-pressed="${winMetric === 'losses'}">Kalah</button>
+          </div>
+          <button class="chip-reset" id="winReset" type="button">Reset</button>
+        </div>
+      </div>
+      <div id="winHeroBody"></div>
+    </div></article>`;
+  }
+
+  function updateWinHero() {
+    const box = $('#winHeroBody');
+    if (!box) return;
+    const { rows, totalW, totalL, totalM } = winStats();
+    const top = rows.slice(0, winTeam === 'all' ? 10 : 1);
+    const max = Math.max(1, ...top.map((r) => (winMetric === 'losses' ? r.l : r.w)));
+    const leader = rows[0];
+    box.innerHTML = `
+      <div class="win-kpis">
+        <div><b>${fmt(totalM)}</b><span>Laga</span></div>
+        <div><b>${fmt(totalW)}</b><span>Menang</span></div>
+        <div><b>${fmt(totalL)}</b><span>Kalah</span></div>
+        <div><b>${fmt(rows.length)}</b><span>Tim</span></div>
+      </div>
+      <div class="win-table">
+        <div class="win-row win-head">
+          <span>#</span><span>Tim</span><span></span><span>M</span><span>K</span><span>%</span>
+        </div>
+        ${
+          top
+            .map(
+              (r, i) => `<div class="win-row">
+                <span class="win-rank">${i + 1}</span>
+                <a class="win-team" href="#/team/${r.id}">${imgOr(
+                  'teams',
+                  F.teams[r.id],
+                  'logo-team'
+                )}<span>${esc(F.teams[r.id])}</span></a>
+                <span class="win-bar"><span style="width:${
+                  ((winMetric === 'losses' ? r.l : r.w) / max) * 100
+                }%;background:${
+                  winMetric === 'losses' ? 'var(--muted)' : 'var(--red)'
+                }"></span></span>
+                <span class="win-val">${r.w}</span>
+                <span class="win-val">${r.l}</span>
+                <span class="win-rate">${pct(r.rate)}</span>
+              </div>`
+            )
+            .join('') || '<p class="chart-note">Tidak ada data pada filter ini.</p>'
+        }
+      </div>
+      <p class="chart-note">${
+        leader
+          ? `${winMetric === 'losses' ? 'Terbanyak kalah' : 'Terbanyak menang'}: ${esc(
+              F.teams[leader.id]
+            )} — ${leader.w} menang, ${leader.l} kalah`
+          : ''
+      } · statistik dari 16 major VCT.</p>
+    `;
+  }
+
+  function initWinHero() {
+    const y = $('#winYear');
+    const t = $('#winTeam');
+    const m = $('#winMetric');
+    const reset = $('#winReset');
+    if (!y || !t || !m || !reset) return;
+    y.addEventListener('change', () => {
+      winYear = y.value;
+      updateWinHero();
+    });
+    t.addEventListener('change', () => {
+      winTeam = t.value;
+      updateWinHero();
+    });
+    m.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-win-metric]');
+      if (!btn) return;
+      winMetric = btn.dataset.winMetric;
+      m.querySelectorAll('[data-win-metric]').forEach((b) =>
+        b.setAttribute('aria-pressed', String(b === btn))
+      );
+      updateWinHero();
+    });
+    reset.addEventListener('click', () => {
+      winYear = 'all';
+      winTeam = 'all';
+      winMetric = 'wins';
+      y.value = 'all';
+      t.value = 'all';
+      m.querySelectorAll('[data-win-metric]').forEach((b) =>
+        b.setAttribute('aria-pressed', String(b.dataset.winMetric === 'wins'))
+      );
+      updateWinHero();
+    });
+    updateWinHero();
+  }
+
+  function podiumCard(p) {
+    const w = p.event;
+    const third = (w.third || [])
+      .map((id) => teamLink(id, 'podium-team'))
+      .join('<span class="team-sep">·</span>');
+    return `<article class="podium-card">
+      <div class="podium-top">
+        <span class="podium-year">${p.year}</span>
+        <span class="podium-event with-logo">${eventBadge(w)}<span>${esc(w.name)}</span></span>
+      </div>
+      ${!p.isChampions ? '<p class="podium-note">Champions tahun ini belum ada; memakai Masters terakhir.</p>' : ''}
+      <div class="podium-row p1">
+        <span class="podium-rank">1</span>${teamLink(w.winner, 'podium-team')}
+        <span class="podium-score">${scoreText(w)}</span>
+      </div>
+      <div class="podium-row p2">
+        <span class="podium-rank">2</span>${teamLink(w.runnerUp, 'podium-team')}<span></span>
+      </div>
+      <div class="podium-row p3">
+        <span class="podium-rank">${w.thirdLabel || '3'}</span>
+        <span class="podium-third">${third || '—'}</span><span></span>
+      </div>
+    </article>`;
+  }
+
   function renderHome() {
-    const latest = [...MAJORS].sort(
-      (a, b) => Number(b.finalMatch || 0) - Number(a.finalMatch || 0)
-    )[0];
-    const latestTix = latest ? TOUR_IDX.get(latest.name) : -1;
-    const latestRoster = latest ? rosterFor(latest).slice(0, 5) : [];
     const ranking = teamRanking();
 
     $('#appView').innerHTML = `
@@ -385,33 +613,11 @@
         `${MAJORS.length} major · ${CHAMPIONS.length} Champions · ${MASTERS.length} Masters · ${ranking.length} tim juara`
       )}
 
-      ${
-        latest
-          ? `<article class="champ-hero panel"><div class="panel-body">
-              <div class="champ-hero-main">
-                <span class="champ-kicker">Juara major terbaru</span>
-                <h2 class="champ-hero-team"><span class="with-logo">${imgOr(
-                  'teams',
-                  F.teams[latest.winner],
-                  'logo-hero'
-                )}<a href="#/team/${latest.winner}">${esc(F.teams[latest.winner])}</a></span></h2>
-                <p class="champ-hero-event"><span class="with-logo">${imgOr(
-                  'events',
-                  latest.name,
-                  'logo-event'
-                )}<span>${esc(latest.name)}</span></span> · ${scoreText(latest)} vs ${teamName(
-                  latest.runnerUp
-                )}</p>
-                <p class="champ-stats">${teamTourStats(latest.winner, latestTix)}</p>
-                <div class="champ-roster">${latestRoster
-                  .map((p) => playerChip(p, latestTix))
-                  .join('')}</div>
-                <a class="section-link" href="#/team/${latest.winner}">Detail tim →</a>
-              </div>
-              <div class="champ-hero-score">${latest.score ? latest.score[0] + '<span>–</span>' + latest.score[1] : '—'}</div>
-            </div></article>`
-          : ''
-      }
+      ${winHeroHtml()}
+
+      <h2 class="dash-title">Podium per tahun</h2>
+      <div class="podium-grid">${PODIUMS.map(podiumCard).join('')}</div>
+      <p class="chart-note">Podium event utama tiap tahun: Champions 2021–2025; 2026 memakai Masters terakhir.</p>
 
       <h2 class="dash-title">Champions</h2>
       <div class="champ-grid">${CHAMPIONS.map(champCard).join('')}</div>
@@ -430,6 +636,8 @@
       <p class="chart-note">Fokus 16 major VCT. Arsip lengkap 235 turnamen tetap tersedia di
         <a href="#/data">Jelajah Data</a>.</p>
     `;
+
+    initWinHero();
   }
 
   /* ------------------------------ VCT ------------------------------ */
