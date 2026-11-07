@@ -146,6 +146,80 @@
     return set ? [...set].sort((a, b) => P_MATCHES[b] - P_MATCHES[a]) : [];
   };
 
+  /* ------------------------------ fokus: 16 major VCT ------------------------------ */
+
+  const isChampions = (w) => /^Valorant Champions \d{4}$/.test(w.name);
+  const MAJORS = WIN.filter((w) => w.tier === 'major' && w.winner != null);
+  const CHAMPIONS = MAJORS.filter(isChampions).sort(
+    (a, b) => (b.year || 0) - (a.year || 0)
+  );
+  const MASTERS = MAJORS.filter((w) => !isChampions(w)).sort(
+    (a, b) => (b.year || 0) - (a.year || 0) || b.name.localeCompare(a.name)
+  );
+
+  const TEAM_TITLES = new Map();
+  MAJORS.forEach((w) => {
+    for (const [idx, key] of [
+      [w.winner, 'titles'],
+      [w.runnerUp, 'finals'],
+    ]) {
+      if (idx == null || idx === TEAM_NONE) continue;
+      let entry = TEAM_TITLES.get(idx);
+      if (!entry) {
+        entry = { titles: [], finals: [] };
+        TEAM_TITLES.set(idx, entry);
+      }
+      entry[key].push(w);
+    }
+  });
+
+  const PLAYER_TITLES = new Map();
+  MAJORS.forEach((w) => {
+    for (const p of rosterFor(w)) {
+      let entry = PLAYER_TITLES.get(p);
+      if (!entry) {
+        entry = { titles: [], teams: new Set() };
+        PLAYER_TITLES.set(p, entry);
+      }
+      entry.titles.push(w);
+      entry.teams.add(w.winner);
+    }
+  });
+
+  const teamRanking = () =>
+    [...TEAM_TITLES.entries()]
+      .filter(([, entry]) => entry.titles.length > 0)
+      .map(([id, entry]) => ({ id, titles: entry.titles, finals: entry.finals }))
+      .sort(
+        (a, b) =>
+          b.titles.length - a.titles.length ||
+          b.finals.length - a.finals.length ||
+          F.teams[a.id].localeCompare(F.teams[b.id])
+      );
+
+  const playerRanking = () =>
+    [...PLAYER_TITLES.entries()]
+      .map(([p, entry]) => ({ p, titles: entry.titles, teams: [...entry.teams] }))
+      .sort(
+        (a, b) =>
+          b.titles.length - a.titles.length ||
+          P_MATCHES[b.p] - P_MATCHES[a.p] ||
+          P_NAMES[a.p].localeCompare(P_NAMES[b.p])
+      );
+
+  const titleHead = `<div class="title-row title-head">
+    <span>#</span><span></span><span>Tim</span><span>Gelar</span><span>Tahun</span><span>Final</span>
+  </div>`;
+
+  const titleRow = (t, i) => `<a class="title-row" href="#/team/${t.id}">
+    <span class="title-rank">${i + 1}</span>
+    ${imgOr('teams', F.teams[t.id], 'logo-team')}
+    <span class="title-name">${esc(F.teams[t.id])}</span>
+    <span class="title-count">${t.titles.length}</span>
+    <span class="title-years">${t.titles.map((w) => w.year).join(' · ')}</span>
+    <span class="title-finals">${t.finals.length}</span>
+  </a>`;
+
   /* ------------------------------ format & tautan ------------------------------ */
 
   const teamLink = (i, cls = '') =>
@@ -297,32 +371,18 @@
   /* ------------------------------ home ------------------------------ */
 
   function renderHome() {
-    const majors = WIN.filter((w) => w.tier === 'major' && w.winner != null);
-    const isChampions = (w) => /^Valorant Champions \d{4}$/.test(w.name);
-    const champs = majors
-      .filter(isChampions)
-      .sort((a, b) => (b.year || 0) - (a.year || 0));
-    const masters = majors
-      .filter((w) => !isChampions(w))
-      .sort((a, b) => (b.year || 0) - (a.year || 0) || b.name.localeCompare(a.name));
-    const latest = [...majors].sort(
+    const latest = [...MAJORS].sort(
       (a, b) => Number(b.finalMatch || 0) - Number(a.finalMatch || 0)
     )[0];
-    const vct = WIN.filter((w) => w.tier === 'vct' && w.winner != null).sort(
-      (a, b) => (b.year || 0) - (a.year || 0) || Number(b.finalMatch || 0) - Number(a.finalMatch || 0)
-    );
-    const other = WIN.filter((w) => w.tier === 'other' && w.winner != null).sort(
-      (a, b) => (b.year || 0) - (a.year || 0) || Number(b.finalMatch || 0) - Number(a.finalMatch || 0)
-    );
-
     const latestTix = latest ? TOUR_IDX.get(latest.name) : -1;
     const latestRoster = latest ? rosterFor(latest).slice(0, 5) : [];
+    const ranking = teamRanking();
 
     $('#appView').innerHTML = `
       ${viewHead(
         'VCT · 2021–2026',
         'Juara VCT',
-        `${majors.length} event internasional · ${champs.length} Champions · ${masters.length} Masters`
+        `${MAJORS.length} major · ${CHAMPIONS.length} Champions · ${MASTERS.length} Masters · ${ranking.length} tim juara`
       )}
 
       ${
@@ -354,22 +414,21 @@
       }
 
       <h2 class="dash-title">Champions</h2>
-      <div class="champ-grid">${champs.map(champCard).join('')}</div>
+      <div class="champ-grid">${CHAMPIONS.map(champCard).join('')}</div>
 
       <h2 class="dash-title">Masters</h2>
-      <div class="champ-grid">${masters.map(champCard).join('')}</div>
+      <div class="champ-grid">${MASTERS.map(champCard).join('')}</div>
 
       <div class="section-head">
-        <h2 class="dash-title">VCT Regional</h2>
-        <a class="section-link" href="#/vct">Lihat semua VCT →</a>
+        <h2 class="dash-title">Papan gelar</h2>
+        <a class="section-link" href="#/teams">Semua tim →</a>
       </div>
-      <div class="winner-table">${winnerRows(vct, 10)}</div>
-
-      <div class="section-head">
-        <h2 class="dash-title">Turnamen lain</h2>
-        <a class="section-link" href="#/lainnya">Cari semua turnamen →</a>
-      </div>
-      <div class="winner-table">${winnerRows(other, 8)}</div>
+      <div class="winner-table">${titleHead}${ranking
+        .slice(0, 8)
+        .map(titleRow)
+        .join('')}</div>
+      <p class="chart-note">Fokus 16 major VCT. Arsip lengkap 235 turnamen tetap tersedia di
+        <a href="#/data">Jelajah Data</a>.</p>
     `;
   }
 
@@ -512,13 +571,70 @@
     update();
   }
 
+  /* ------------------------------ papan gelar & pemain juara ------------------------------ */
+
+  function renderTeamsIndex() {
+    const rows = teamRanking();
+    $('#appView').innerHTML = `
+      ${viewHead(
+        'Tim',
+        'Papan gelar major',
+        `${rows.length} tim pernah menjuarai VCT major · ${MAJORS.length} gelar`
+      )}
+      <div class="winner-table">${titleHead}${rows.map(titleRow).join('')}</div>
+      <p class="chart-note">Gelar major = VCT Champions atau Masters. Gelar regional/Challengers
+        tetap tercatat di halaman masing-masing tim.</p>
+    `;
+  }
+
+  function renderPlayersIndex() {
+    const rows = playerRanking();
+    $('#appView').innerHTML = `
+      ${viewHead(
+        'Pemain',
+        'Pemain juara major',
+        `${rows.length} pemain pernah menjuarai VCT major`
+      )}
+      <div class="winner-table">
+        <div class="player-title-row player-title-head">
+          <span></span><span>Pemain</span><span>Tim</span><span>Gelar</span><span>Tahun</span>
+        </div>
+        ${rows
+          .map(
+            (r) => `<a class="player-title-row" href="#/player/${r.p}">
+              ${imgOr('players', P_NAMES[r.p], 'avatar-player')}
+              <span class="player-title-name">${esc(P_NAMES[r.p])}</span>
+              <span class="player-title-team">${r.teams
+                .map(
+                  (t) =>
+                    `<span class="team-inline with-logo">${imgOr(
+                      'teams',
+                      F.teams[t],
+                      'logo-team'
+                    )}<span>${esc(F.teams[t])}</span></span>`
+                )
+                .join('<span class="team-sep">·</span>')}</span>
+              <span class="title-count">${r.titles.length}</span>
+              <span class="title-years">${r.titles.map((w) => w.year).join(' · ')}</span>
+            </a>`
+          )
+          .join('')}
+      </div>
+      <p class="chart-note">Termasuk pemain pengganti yang tampil untuk tim juara di turnamen tersebut.</p>
+    `;
+  }
+
   /* ------------------------------ halaman tim ------------------------------ */
 
   function renderTeam(id) {
     if (!(id >= 0 && id < F.teams.length)) return renderNotFound();
     const st = A.teamStats.get(id);
+    const tt = TEAM_TITLES.get(id) || { titles: [], finals: [] };
     const trophies = WIN.filter((w) => w.winner === id).sort(
-      (a, b) => (b.year || 0) - (a.year || 0) || Number(b.finalMatch || 0) - Number(a.finalMatch || 0)
+      (a, b) =>
+        (b.tier === 'major') - (a.tier === 'major') ||
+        (b.year || 0) - (a.year || 0) ||
+        Number(b.finalMatch || 0) - Number(a.finalMatch || 0)
     );
     const perf = T_PERF.get(id) || [];
     const maps = perf.reduce((s, r) => s + r.maps, 0);
@@ -537,14 +653,21 @@
       ${viewHead(
         'Tim',
         esc(F.teams[id]),
-        `${esc(teamRegion(id))} · ${trophies.length} trofi · ${st ? fmt(st.matches) : 0} laga`,
+        `${esc(teamRegion(id))} · ${tt.titles.length} gelar major · ${trophies.length} trofi · ${
+          st ? fmt(st.matches) : 0
+        } laga`,
         imgOr('teams', F.teams[id], 'logo-hero')
       )}
       <a class="back-link" href="#/">← Kembali ke juara</a>
       <div class="dash">
         <article class="panel col-8">
           <div class="panel-body">
-            <div class="panel-head"><h2 class="panel-title">Piala</h2><span class="panel-note">${trophies.length} turnamen</span></div>
+            <div class="panel-head"><h2 class="panel-title">Penghargaan</h2><span class="panel-note">${tt.titles.length} major · ${trophies.length} total</span></div>
+            <div class="rd-stats">
+              <div><b>${tt.titles.length}</b><span>Gelar major</span></div>
+              <div><b>${tt.finals.length}</b><span>Final major</span></div>
+              <div><b>${trophies.length}</b><span>Total gelar</span></div>
+            </div>
             <div class="trophy-list">${
               trophies
                 .map(
@@ -558,6 +681,7 @@
                 )
                 .join('') || '<p class="chart-note">Belum ada trofi pada arsip ini.</p>'
             }</div>
+            <p class="rd-method">Penghargaan = gelar turnamen. Dataset tidak memuat MVP atau penghargaan individu.</p>
 
             <div class="panel-head" style="margin-top:18px"><h2 class="panel-title">Performa</h2><span class="panel-note">seluruh turnamen</span></div>
             <div class="rd-stats">
@@ -620,12 +744,13 @@
 
     const recent = matches.slice(-12).reverse();
     const mainTeam = P_TEAM[id] === A.P_NONE ? -1 : P_TEAM[id];
+    const pt = PLAYER_TITLES.get(id) || { titles: [], teams: new Set() };
 
     $('#appView').innerHTML = `
       ${viewHead(
         'Pemain',
         esc(P_NAMES[id]),
-        `${mainTeam >= 0 ? esc(F.teams[mainTeam]) : 'Tanpa tim utama'} · ${first}–${last} · ${fmt(matches.length)} laga`,
+        `${mainTeam >= 0 ? esc(F.teams[mainTeam]) : 'Tanpa tim utama'} · ${pt.titles.length} gelar major · ${first}–${last} · ${fmt(matches.length)} laga`,
         imgOr('players', P_NAMES[id], 'avatar-hero')
       )}
       <a class="back-link" href="#/">← Kembali ke juara</a>
@@ -670,10 +795,10 @@
 
         <article class="panel col-4">
           <div class="panel-body">
-            <div class="panel-head"><h2 class="panel-title">Piala</h2><span class="panel-note">${trophies.length}</span></div>
+            <div class="panel-head"><h2 class="panel-title">Penghargaan</h2><span class="panel-note">${pt.titles.length} major · ${trophies.length} total</span></div>
             <div class="trophy-list">${
               trophies
-                .sort((a, b) => (b.year || 0) - (a.year || 0))
+                .sort((a, b) => (b.tier === 'major') - (a.tier === 'major') || (b.year || 0) - (a.year || 0))
                 .map(
                   (w) => `<div class="trophy-row">
                     ${eventBadge(w)}
@@ -684,6 +809,7 @@
                 )
                 .join('') || '<p class="chart-note">Belum ada trofi.</p>'
             }</div>
+            <p class="rd-method">Gelar major dihitung dari roster tim juara. Dataset tidak memuat MVP atau penghargaan individu.</p>
 
             <div class="panel-head" style="margin-top:18px"><h2 class="panel-title">Laga terakhir</h2></div>
             <div class="match-list">${
@@ -740,12 +866,15 @@
     } else if (path.startsWith('/player/')) {
       renderPlayer(Number(path.split('/')[2]));
       setActive('');
-    } else if (path === '/vct') {
-      renderVct();
-      setActive('/vct');
-    } else if (path === '/lainnya') {
-      renderOthers();
-      setActive('/lainnya');
+    } else if (path === '/teams') {
+      renderTeamsIndex();
+      setActive('/teams');
+    } else if (path === '/players') {
+      renderPlayersIndex();
+      setActive('/players');
+    } else if (path === '/vct' || path === '/lainnya') {
+      renderHome();
+      setActive('/');
     } else {
       renderHome();
       setActive('/');

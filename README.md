@@ -1,11 +1,12 @@
 # Juara VCT 2021–2026 — Infografis Interaktif
 
 Satu file HTML mandiri yang menjawab satu pertanyaan utama:
-**siapa juara turnamen VALORANT tiap tahun, dengan siapa pemainnya, dan bagaimana performanya.**
+**siapa juara 16 major VCT (Champions & Masters), dengan siapa pemainnya, dan bagaimana performanya.**
 
-Urutan cerita: **VCT Champions → VCT Masters → VCT regional/Challengers → turnamen lain**.
-Setiap juara menampilkan tim, roster, skor final, dan tautan ke **halaman tim** serta **halaman pemain**.
-Dashboard analitik lama tetap tersedia di view **Jelajah Data**.
+Cakupan sorotan: **16 major VCT**. Setiap juara menampilkan tim, roster, skor final, performa,
+serta tautan ke **halaman tim** dan **halaman pemain**.
+Data lengkap **235 turnamen** (regional, Challengers, pihak ketiga) tetap utuh dan dapat diakses
+di **Arsip Data** — tidak dihapus, hanya tidak lagi menjadi cerita utama.
 
 ## Cara membuka
 
@@ -17,12 +18,12 @@ Tidak ada request jaringan. Rute hash di dalam satu file:
 
 | Rute | Isi |
 |---|---|
-| `#/` | Juara: hero juara terbaru, timeline Champions, grid Masters, regional, turnamen lain |
-| `#/vct` | Semua juara VCT (major + regional/Challengers), filter tahun & pencarian |
-| `#/lainnya` | Juara turnamen non-VCT (Oceania, Strike Arabia, Skyesports, dll.) |
-| `#/team/<id>` | Halaman tim: piala, performa, roster, laga terakhir |
-| `#/player/<id>` | Halaman pemain: karier, performa per turnamen, piala, laga terakhir |
-| `#/data` | Dashboard analitik + tabel cari data (pemain/laga/tim/turnamen) |
+| `#/` | Juara: hero major terbaru, 5 kartu Champions, 11 kartu Masters, papan gelar tim |
+| `#/teams` | Papan gelar major: tim juara, jumlah gelar, final, tahun |
+| `#/players` | Pemain yang pernah menjuarai major (roster tim juara) |
+| `#/team/<id>` | Halaman tim: penghargaan (major/final/total), performa, roster, laga terakhir |
+| `#/player/<id>` | Halaman pemain: karier, gelar major, performa per turnamen, laga terakhir |
+| `#/data` | Arsip lengkap 235 turnamen + dashboard analitik + tabel cari data |
 
 ## Struktur data
 
@@ -101,12 +102,15 @@ Tanpa folder `dataset/kaggle`, build tetap jalan, tetapi juara/performa kosong.
 
 ## Fitur
 
-- **Juara**: kartu per event dengan tim, runner-up, skor, dan roster (rating per pemain).
-- **VCT**: filter tahun, pencarian event/tim, kartu major + tabel regional/Challengers.
-- **Turnamen lain**: pencarian event/tim; turnamen non-VCT (Oceania, Strike Arabia, Skyesports, dll.).
-- **Halaman tim**: piala, menang–kalah, win rate, rating/ACS, peta, roster, 12 laga terakhir.
-- **Halaman pemain**: laga, W–L, win rate, rating, ACS, K/D, performa per turnamen, piala, 12 laga terakhir.
-- **Jelajah Data**: dashboard peta/stage/wilayah/tim/pemain + tabel cari lintas data.
+- **Juara**: 16 major (5 Champions, 11 Masters) dengan tim, runner-up, skor final, roster,
+  dan performa tim di turnamen (peta, rating, ACS).
+- **Papan gelar**: tim juara major, jumlah gelar, final, dan tahun; setiap baris menuju halaman tim.
+- **Pemain juara**: daftar pemain yang pernah menjuarai major, dengan tim dan tahun.
+- **Halaman tim**: penghargaan (gelar major, final major, total gelar), performa (W–L, win rate,
+  rating, ACS, peta), roster, dan 12 laga terakhir.
+- **Halaman pemain**: karier (W–L, win rate, rating, ACS, K/D), gelar major, performa per turnamen,
+  dan 12 laga terakhir.
+- **Arsip Data**: 235 turnamen + dashboard peta/stage/wilayah/tim/pemain + tabel cari lintas data.
 - **Gambar**: logo event di kartu/tabel/piala, logo tim di kartu/tim/lawan, foto pemain di roster,
   halaman pemain, dan tabel performa. Event VCT tanpa logo spesifik memakai lambang VCT;
   entitas tanpa gambar memakai inisial.
@@ -122,6 +126,8 @@ foto 89 pemain (40 teratas + roster final major).
 
 ## Keterbatasan
 
+- **Sorotan dibatasi ke 16 major VCT**; 219 turnamen lain tetap ada di Arsip Data.
+- Penghargaan di halaman tim/pemain = **gelar turnamen**; dataset tidak memuat MVP/penghargaan individu.
 - Juara hanya diisi bila **final & skor** terdeteksi; turnamen liga tanpa final tidak punya juara.
 - Performa dari `overview.csv`; sebagian kecil laga tidak punya data lineup/performa.
 - Statistik tim/pemain di halaman detail adalah **agregat per turnamen**, bukan per peta.
